@@ -1,5 +1,5 @@
-// Автор: Алексей Журавлевreturn
-// Описание: Реализация методов класса COverlappedWindow. Описание класса в файле "OverlappedWindow.h"
+п»ї// РђРІС‚РѕСЂ: РђР»РµРєСЃРµР№ Р–СѓСЂР°РІР»РµРІ
+// РћРїРёСЃР°РЅРёРµ: Р РµР°Р»РёР·Р°С†РёСЏ РјРµС‚РѕРґРѕРІ РєР»Р°СЃСЃР° COverlappedWindow. РћРїРёСЃР°РЅРёРµ РєР»Р°СЃСЃР° РІ С„Р°Р№Р»Рµ "OverlappedWindow.h"
 
 #include "OverlappedWindow.h"
 #include <Windows.h>
@@ -28,7 +28,7 @@ bool COverlappedWindow::Create()
 {
     handle = CreateWindowEx(WS_EX_TOPMOST, L"OverlappedWindow", L"My Window", WS_EX_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, GetModuleHandle(0), 0);
-    // Запоминаем указатель на объект данного окна для использования в статической оконной процедуре
+    // Р—Р°РїРѕРјРёРЅР°РµРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РѕР±СЉРµРєС‚ РґР°РЅРЅРѕРіРѕ РѕРєРЅР° РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РІ СЃС‚Р°С‚РёС‡РµСЃРєРѕР№ РѕРєРѕРЅРЅРѕР№ РїСЂРѕС†РµРґСѓСЂРµ
     SetWindowLongPtr(handle, GWLP_USERDATA, (LONG)this);
     return (handle != 0);
 }
@@ -42,7 +42,7 @@ void COverlappedWindow::OnDestroy()
 {
 }
 
-// Оконная процедура. Обработка сообщений, приходящий в окно.
+// РћРєРѕРЅРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР°. РћР±СЂР°Р±РѕС‚РєР° СЃРѕРѕР±С‰РµРЅРёР№, РїСЂРёС…РѕРґСЏС‰РёР№ РІ РѕРєРЅРѕ.
 LRESULT COverlappedWindow::windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message) {
