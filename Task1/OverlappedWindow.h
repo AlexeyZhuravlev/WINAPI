@@ -22,8 +22,14 @@ public:
 protected:
 	// Функция, вызываемая при уничтожении окна
 	void OnDestroy();
+    
+    void OnPaint();
+
+    void OnTimer();
 
 private:
 	HWND handle; // Хэндл окна
+    UINT_PTR timerId;
+    double time;
 	static LRESULT __stdcall windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
 };
