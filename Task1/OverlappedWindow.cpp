@@ -1,4 +1,4 @@
-﻿// Автор: Алексей Журавлевreturn
+﻿// Автор: Алексей Журавлев
 // Описание: Реализация методов класса COverlappedWindow. Описание класса в файле "OverlappedWindow.h"
 
 #include "OverlappedWindow.h"
@@ -38,18 +38,19 @@ void COverlappedWindow::Show(int cmdShow)
 
 void COverlappedWindow::OnDestroy()
 {
+    PostQuitMessage(0);
 }
 
 // Оконная процедура. Обработка сообщений, приходящий в окно.
 LRESULT COverlappedWindow::windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message) {
-        case WM_CREATE:
+        case WM_NCCREATE:
         {
             COverlappedWindow* window = (COverlappedWindow*)((CREATESTRUCT*)lParam)->lpCreateParams;
             SetLastError(0);
             SetWindowLongPtr(handle, GWLP_USERDATA, (LONG)window);
-            if (GetLastError() != 0) {
+            if( GetLastError() != 0 ) {
                 return GetLastError();
             }
             return DefWindowProc(handle, message, wParam, lParam);
@@ -58,7 +59,6 @@ LRESULT COverlappedWindow::windowProc(HWND handle, UINT message, WPARAM wParam, 
         {
             COverlappedWindow* window = (COverlappedWindow*)GetWindowLongPtr(handle, GWLP_USERDATA);
             window->OnDestroy();
-            PostQuitMessage(0);
             return 0;
         }
         default:
