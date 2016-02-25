@@ -1,4 +1,4 @@
-﻿// Автор: Алексей Журавлев
+﻿// Автор: Алексей Журавлевreturn
 // Описание: Реализация методов класса COverlappedWindow. Описание класса в файле "OverlappedWindow.h"
 
 #include "OverlappedWindow.h"
@@ -27,9 +27,7 @@ bool COverlappedWindow::RegisterClass()
 bool COverlappedWindow::Create()
 {
     handle = CreateWindowEx(WS_EX_TOPMOST, L"OverlappedWindow", L"My Window", WS_EX_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, GetModuleHandle(0), 0);
-    // Запоминаем указатель на объект данного окна для использования в статической оконной процедуре
-    SetWindowLongPtr(handle, GWLP_USERDATA, (LONG)this);
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, GetModuleHandle(0), this);
     return (handle != 0);
 }
 
@@ -46,6 +44,16 @@ void COverlappedWindow::OnDestroy()
 LRESULT COverlappedWindow::windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message) {
+        case WM_CREATE:
+        {
+            COverlappedWindow* window = (COverlappedWindow*)((CREATESTRUCT*)lParam)->lpCreateParams;
+            SetLastError(0);
+            SetWindowLongPtr(handle, GWLP_USERDATA, (LONG)window);
+            if (GetLastError() != 0) {
+                return GetLastError();
+            }
+            return DefWindowProc(handle, message, wParam, lParam);
+        }
         case WM_DESTROY:
         {
             COverlappedWindow* window = (COverlappedWindow*)GetWindowLongPtr(handle, GWLP_USERDATA);
@@ -53,7 +61,7 @@ LRESULT COverlappedWindow::windowProc(HWND handle, UINT message, WPARAM wParam, 
             PostQuitMessage(0);
             return 0;
         }
-    default:
-        return DefWindowProc(handle, message, wParam, lParam);
+        default:
+            return DefWindowProc(handle, message, wParam, lParam);
     }
 }
