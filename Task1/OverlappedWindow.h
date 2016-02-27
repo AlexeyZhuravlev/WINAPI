@@ -20,16 +20,25 @@ public:
 	void Show(int cmdShow);
 
 protected:
-	// Функция, вызываемая при уничтожении окна
+	// Функция, вызываемая при уничтожении окна (приход сообщения WM_DESTROY)
 	void OnDestroy();
-    
+    // Функция, вызываемая при создании окна (приход сообщени WM_CREATE)
+    void OnCreate();
+    // Фукнция, вызываемая при приходе в окно сообщения WM_PAINT
     void OnPaint();
-
+    // Функция, вызываемая при приходе сообщения WM_TIMER
     void OnTimer();
 
 private:
 	HWND handle; // Хэндл окна
-    UINT_PTR timerId;
-    double time;
+    UINT_PTR timerId; // Идентификатор таймера сообщения об обновлении анимации
+    HDC bufferDC; // Хэндл контекста для двойной буферизации
+    HBITMAP bufferEllipse, bufferMask; // Хендлы изображения эллипса и пустого прямоугольника для контекста двойной буферизации
+    double time; // Параметр времени. Характеризует положение эллипса
+    const double deltaTime = 0.05; // Изменение времени при каждом приходе WM_TIMER
+    static const int r = 30; // Радиус эллипса
+
 	static LRESULT __stdcall windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
+    void displayBufferOnWindow(HDC windowDC, RECT clientRect);
+    void drawEllipse(HDC targetDC);
 };
