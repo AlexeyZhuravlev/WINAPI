@@ -32,13 +32,10 @@ protected:
 private:
 	HWND handle; // Хэндл окна
     UINT_PTR timerId; // Идентификатор таймера сообщения об обновлении анимации
-    HDC bufferDC; // Хэндл контекста для двойной буферизации
-    HBITMAP bufferEllipse, bufferMask; // Хендлы изображения эллипса и пустого прямоугольника для контекста двойной буферизации
     double time; // Параметр времени. Характеризует положение эллипса
-    const double deltaTime = 0.05; // Изменение времени при каждом приходе WM_TIMER
+    const double deltaTime = 0.04; // Изменение времени при каждом приходе WM_TIMER
     static const int r = 30; // Радиус эллипса
 
-	static LRESULT __stdcall windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
-    void displayBufferOnWindow(HDC windowDC, RECT clientRect);
-    void drawEllipse(HDC targetDC);
+    static LRESULT __stdcall windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
+    void drawEllipse(HDC targetDC, int x, int y);
 };
