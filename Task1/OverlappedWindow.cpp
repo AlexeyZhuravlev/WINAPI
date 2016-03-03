@@ -5,8 +5,13 @@
 #include <Windows.h>
 #include <iostream>
 
+const double COverlappedWindow::deltaTime = 0.05;
+
 COverlappedWindow::COverlappedWindow() 
 {
+    time = 0;
+    handle = 0;
+    timerId = 0;
 }
 
 COverlappedWindow::~COverlappedWindow()
@@ -27,7 +32,7 @@ bool COverlappedWindow::RegisterClass()
 
 bool COverlappedWindow::Create()
 {
-    handle = CreateWindowEx(0, L"OverlappedWindow", L"My Window", WS_EX_OVERLAPPEDWINDOW,
+    CreateWindowEx(0, L"OverlappedWindow", L"My Window", WS_EX_OVERLAPPEDWINDOW | WS_SIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, GetModuleHandle(0), this);
     return (handle != 0);
 }
@@ -43,9 +48,13 @@ void COverlappedWindow::OnDestroy()
     PostQuitMessage(0);
 }
 
+void COverlappedWindow::OnNCCreate(HWND _handle) {
+    handle = _handle;
+}
+
 void COverlappedWindow::OnCreate()
 {
-    time = 0;
+    timerId = SetTimer(handle, 0, 50, 0);
 }
 
 // Отрисовка эллипса в целевом контексте с центром в координате (x, y). Эллипс имеет радиус, указанный в параметре r класса.
@@ -53,9 +62,11 @@ void COverlappedWindow::drawEllipse(HDC targetDC, int x, int y)
 {
     HPEN pen = CreatePen(PS_SOLID, 1, RGB(0, 255, 0));
     HBRUSH innBrush = CreateSolidBrush(RGB(0, 0, 255));
-    SelectObject(targetDC, pen);
-    SelectObject(targetDC, innBrush);
+    HGDIOBJ oldPen = SelectObject(targetDC, pen);
+    HGDIOBJ oldBrush = SelectObject(targetDC, innBrush);
     Ellipse(targetDC, x - r, y - r, x + r, y + r);
+    SelectObject(targetDC, oldPen);
+    SelectObject(targetDC, oldBrush);
     DeleteObject(innBrush);
     DeleteObject(pen);
 }
@@ -69,13 +80,15 @@ void COverlappedWindow::OnPaint()
     HDC displayBufferDC = CreateCompatibleDC(windowDC);
     HBITMAP displayBuffer = CreateCompatibleBitmap(windowDC, clientRect.right - clientRect.left, 
         clientRect.bottom - clientRect.top);
-    SelectObject(displayBufferDC, displayBuffer);
+    HGDIOBJ oldDisplayBuffer = SelectObject(displayBufferDC, displayBuffer);
     int R = min((clientRect.right - clientRect.left) / 2, (clientRect.bottom - clientRect.top) / 2) - r;
     int x = (clientRect.left + clientRect.right) / 2 + R * cos(time);
     int y = (clientRect.top + clientRect.bottom) / 2 + R * sin(time);
     FillRect(displayBufferDC, &clientRect, (HBRUSH)GetStockObject(GRAY_BRUSH));
     drawEllipse(displayBufferDC, x, y);
-    BitBlt(windowDC, 0, 0, clientRect.right, clientRect.bottom, displayBufferDC, 0, 0, SRCCOPY);
+    BitBlt(windowDC, clientRect.left, clientRect.top, clientRect.right - clientRect.left, 
+        clientRect.bottom - clientRect.top, displayBufferDC, 0, 0, SRCCOPY);
+    SelectObject(displayBufferDC, oldDisplayBuffer);
     DeleteObject(displayBuffer);
     DeleteDC(displayBufferDC);
     ::EndPaint(handle, &paintStruct);
@@ -101,7 +114,7 @@ LRESULT COverlappedWindow::windowProc(HWND handle, UINT message, WPARAM wParam, 
             if( GetLastError() != 0 ) {
                 return GetLastError();
             }
-            window->timerId = SetTimer(handle, 0, 20, 0);
+            window->OnNCCreate(handle);
             return DefWindowProc(handle, message, wParam, lParam);
         }
         case WM_CREATE:
