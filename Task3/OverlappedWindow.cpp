@@ -1,5 +1,5 @@
-// Автор: Алексей Журавлев
-// Описание: Реализация методов класса COverlappedWindow. Описание класса в файле "OverlappedWindow.h"
+п»ї// РђРІС‚РѕСЂ: РђР»РµРєСЃРµР№ Р–СѓСЂР°РІР»РµРІ
+// РћРїРёСЃР°РЅРёРµ: Р РµР°Р»РёР·Р°С†РёСЏ РјРµС‚РѕРґРѕРІ РєР»Р°СЃСЃР° COverlappedWindow. РћРїРёСЃР°РЅРёРµ РєР»Р°СЃСЃР° РІ С„Р°Р№Р»Рµ "OverlappedWindow.h"
 
 #include "OverlappedWindow.h"
 #include "EllipseWindow.h"
@@ -76,7 +76,7 @@ void COverlappedWindow::OnDestroy()
 {
 }
 
-// Оконная процедура. Обработка сообщений, приходящих в окно.
+// РћРєРѕРЅРЅР°СЏ РїСЂРѕС†РµРґСѓСЂР°. РћР±СЂР°Р±РѕС‚РєР° СЃРѕРѕР±С‰РµРЅРёР№, РїСЂРёС…РѕРґСЏС‰РёС… РІ РѕРєРЅРѕ.
 LRESULT COverlappedWindow::windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message) {
