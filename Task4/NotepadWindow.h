@@ -1,41 +1,41 @@
 ﻿// Автор: Алексей Журавлев
-// Описание: Класс СNotepadWindow. Сильно упрощённый текстовый редактор.
+// Описание: Класс CNotepadWindow. Cильно упрощённый текстовый редактор.
 
 #pragma once
 #include <Windows.h>
 #include "EditControlWindow.h"
 
-class СNotepadWindow {
+class CNotepadWindow {
 public:
-    СNotepadWindow();
-    ~СNotepadWindow();
+    CNotepadWindow();
+    ~CNotepadWindow();
 
     // Зарегистрировать класс окна
     static bool RegisterClass();
 
-    // Создать экземпляр окна
+    // Cоздать экземпляр окна
     bool Create();
     // Показать окно
     void Show(int cmdShow);
 
 protected:
-    // Функция, вызываемая при создании контекста окна (приход сообщени WM_NCCREATE)
+    // Функция, вызываемая при Cоздании контекCта окна (приход Cообщения WM_NCCREATE)
     void OnNCCreate(HWND handle);
-    // Функция, вызываемая при создании окна (приход сообщени WM_CREATE)
+    // Функция, вызываемая при Cоздании окна (приход Cообщени WM_CREATE)
     void OnCreate();
-    // Функция, вызываемая при изменении размера окна (приход сообщения WM_SIZE)
+    // Функция, вызываемая при изменении размера окна (приход Cообщения WM_SIZE)
     void OnSize();
-    // Функция, вызываемая при изменении закрытии окна (приход сообщения WM_CLOSE)
+    // Функция, вызываемая при изменении закрытии окна (приход Cообщения WM_CLOSE)
     bool OnClose();
-    // Функция, вызываемая при приходе сообщения от сына (приход сообщения WM_COMMAND)
+    // Функция, вызываемая при приходе Cообщения от Cына (приход Cообщения WM_COMMAND)
     void OnCommand(WPARAM wParam, LPARAM lParam);
-    // Функция, вызываемая при уничтожении окна (приход сообщения WM_DESTROY)
+    // Функция, вызываемая при уничтожении окна (приход Cообщения WM_DESTROY)
     void OnDestroy();
 
 private:
     HWND handle; // Хэндл окна
-    СEditControlWindow editControl; // Дочерний edit-control окна
-    bool changed; // Флаг, показывающий, производился ли ввод в окно.
+    CEditControlWindow editControl; // Дочерний edit-control окна
+    bool changed; // Флаг, показывающий, производилCя ли ввод в окно.
 
     void saveText();
 

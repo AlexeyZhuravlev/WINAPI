@@ -7,10 +7,10 @@
 
 int WINAPI wWinMain( HINSTANCE instance, HINSTANCE prevInstance, LPWSTR commandLine, int cmdShow ) 
 {
-    if (!СNotepadWindow::RegisterClass()) {
+    if (!CNotepadWindow::RegisterClass()) {
 		return -1;
 	}
-    СNotepadWindow window;
+    CNotepadWindow window;
 	if( !window.Create() ) {
 		return -1;
 	}

@@ -1,54 +1,54 @@
 ﻿// Автор: Алексей Журавлев
-// Описание: Реализация методов класса СNotepadWindow. Описание класса в файле "NotepadWindow.h"
+// ОпиCание: Реализация методов класса CNotepadWindow. Описание класса в файле "NotepadWindow.h"
 
 #include "NotepadWindow.h"
 
-СNotepadWindow::СNotepadWindow()
+CNotepadWindow::CNotepadWindow()
 {
     handle = 0;
     changed = false;
-    editControl = СEditControlWindow();
+    editControl = CEditControlWindow();
 }
 
-СNotepadWindow::~СNotepadWindow()
+CNotepadWindow::~CNotepadWindow()
 {
 }
 
-bool СNotepadWindow::RegisterClass()
+bool CNotepadWindow::RegisterClass()
 {
     WNDCLASSEX windowClass;
     ::ZeroMemory(&windowClass, sizeof(windowClass));
     windowClass.cbSize = sizeof(WNDCLASSEX);
-    windowClass.lpfnWndProc = СNotepadWindow::windowProc;
+    windowClass.lpfnWndProc = CNotepadWindow::windowProc;
     windowClass.hInstance = GetModuleHandle(0);
     windowClass.lpszClassName = L"NotepadWindow";
     return (::RegisterClassEx(&windowClass) != 0);
 }
 
-bool СNotepadWindow::Create()
+bool CNotepadWindow::Create()
 {
     CreateWindowEx(0, L"NotepadWindow", L"Notepad--", WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, GetModuleHandle(0), this);
     return (handle != 0);
 }
 
-void СNotepadWindow::Show(int cmdShow)
+void CNotepadWindow::Show(int cmdShow)
 {
     ShowWindow(handle, cmdShow);
     editControl.Show(cmdShow);
 }
 
-void СNotepadWindow::OnNCCreate(HWND _handle) 
+void CNotepadWindow::OnNCCreate(HWND _handle) 
 {
     handle = _handle;
 }
 
-void СNotepadWindow::OnCreate()
+void CNotepadWindow::OnCreate()
 {
     editControl.Create(handle);
 }
 
-void СNotepadWindow::OnSize()
+void CNotepadWindow::OnSize()
 {
     RECT rect;
     ::GetClientRect(handle, &rect);
@@ -56,8 +56,8 @@ void СNotepadWindow::OnSize()
         rect.bottom - rect.left, 0);
 }
 
-// Функция для сохранения данных editControl в текстовый файл. Имя файла получает из диалога с пользователем.
-void СNotepadWindow::saveText()
+// Функция для Cохранения данных editControl в текCтовый файл. Имя файла получает из диалога C пользователем.
+void CNotepadWindow::saveText()
 {
     int length = SendMessage(editControl.GetHandle(), WM_GETTEXTLENGTH, 0, 0);
     wchar_t *text = new wchar_t[length + 1];
@@ -76,10 +76,10 @@ void СNotepadWindow::saveText()
     delete[] text;
 }
 
-bool СNotepadWindow::OnClose()
+bool CNotepadWindow::OnClose()
 {
     if( changed ) {
-        int msgBoxID = MessageBox(handle, L"Сохранить введённый текст?", L"Notepad--", MB_YESNOCANCEL);
+        int msgBoxID = MessageBox(handle, L"Cохранить введённый текст?", L"Notepad--", MB_YESNOCANCEL);
         switch (msgBoxID)
         {
             case IDYES:
@@ -99,7 +99,7 @@ bool СNotepadWindow::OnClose()
     }
 }
 
-void СNotepadWindow::OnCommand(WPARAM wParam, LPARAM lParam)
+void CNotepadWindow::OnCommand(WPARAM wParam, LPARAM lParam)
 {
     switch HIWORD(wParam)
     {
@@ -110,17 +110,17 @@ void СNotepadWindow::OnCommand(WPARAM wParam, LPARAM lParam)
     }
 }
 
-void СNotepadWindow::OnDestroy() 
+void CNotepadWindow::OnDestroy() 
 {
     PostQuitMessage(0);
 }
 
-// Оконная процедура. Обработка сообщений, приходящих в окно.
-LRESULT СNotepadWindow::windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
+// Оконная процедура. Обработка Cообщений, приходящих в окно.
+LRESULT CNotepadWindow::windowProc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
     if (message == WM_NCCREATE) {
-        СNotepadWindow* window =
-            reinterpret_cast<СNotepadWindow*>((reinterpret_cast<CREATESTRUCT*>(lParam))->lpCreateParams);
+        CNotepadWindow* window =
+            reinterpret_cast<CNotepadWindow*>((reinterpret_cast<CREATESTRUCT*>(lParam))->lpCreateParams);
         SetLastError(0);
         SetWindowLongPtr(handle, GWLP_USERDATA, (LONG)window);
         if (GetLastError() != 0) {
@@ -129,7 +129,7 @@ LRESULT СNotepadWindow::windowProc(HWND handle, UINT message, WPARAM wParam, LP
         window->OnNCCreate(handle);
         return DefWindowProc(handle, message, wParam, lParam);
     }
-    СNotepadWindow* window = reinterpret_cast<СNotepadWindow*>(GetWindowLongPtr(handle, GWLP_USERDATA));
+    CNotepadWindow* window = reinterpret_cast<CNotepadWindow*>(GetWindowLongPtr(handle, GWLP_USERDATA));
     switch (message) {
         case WM_CREATE:
         {

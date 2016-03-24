@@ -1,21 +1,21 @@
-// Автор: Алексей Журавлев
-// Описание: Класс СEditControlWindow. Создаётся как дочерний Edit-control другого окна.
+п»ї// РђРІС‚РѕСЂ: РђР»РµРєСЃРµР№ Р–СѓСЂР°РІР»РµРІ
+// РћРїРёCР°РЅРёРµ: РљР»Р°СЃСЃ CEditControlWindow. CРѕР·РґР°С‘С‚СЃСЏ РєР°Рє РґРѕС‡РµСЂРЅРёР№ Edit-control РґСЂСѓРіРѕРіРѕ РѕРєРЅР°.
 
 #pragma once
 #include <Windows.h>
 
-class СEditControlWindow {
+class CEditControlWindow {
 public:
-    СEditControlWindow();
-    ~СEditControlWindow();
+    CEditControlWindow();
+    ~CEditControlWindow();
 
-    // Создать экземпляр окна
+    // CРѕР·РґР°С‚СЊ СЌРєР·РµРјРїР»СЏСЂ РѕРєРЅР°
     bool Create(HWND parentHandle);
-    // Показать окно
+    // РџРѕРєР°Р·Р°С‚СЊ РѕРєРЅРѕ
     void Show(int cmdShow);
-    // Получить хэндл окна
+    // РџРѕР»СѓС‡РёС‚СЊ С…СЌРЅРґР» РѕРєРЅР°
     HWND GetHandle();
 
 private:
-    HWND handle; // Хэндл окна
+    HWND handle; // РҐСЌРЅРґР» РѕРєРЅР°
 };

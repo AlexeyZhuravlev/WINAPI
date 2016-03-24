@@ -1,28 +1,28 @@
-// Авbтор: Алексей Журавлев
-// Описание: Реализация методов класса СNotepadWindow. Описание класса в файле "NotepadWindow.h"
+п»ї// РђРІС‚РѕСЂ: РђР»РµРєСЃРµР№ Р–СѓСЂР°РІР»РµРІ
+// РћРїРёCР°РЅРёРµ: Р РµР°Р»РёР·Р°С†РёСЏ РјРµС‚РѕРґРѕРІ РєР»Р°СЃСЃР° CNotepadWindow. РћРїРёСЃР°РЅРёРµ РєР»Р°СЃСЃР° РІ С„Р°Р№Р»Рµ "NotepadWindow.h"
 
 #include "EditControlWindow.h"
 
-СEditControlWindow::СEditControlWindow() 
+CEditControlWindow::CEditControlWindow() 
 {
     handle = 0;
 }
 
-СEditControlWindow::~СEditControlWindow()
+CEditControlWindow::~CEditControlWindow()
 {
 }
 
-bool СEditControlWindow::Create(HWND parentHandle) {
+bool CEditControlWindow::Create(HWND parentHandle) {
     handle = CreateWindowEx(0, L"EDIT", 0, WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parentHandle, 0, GetModuleHandle(0), 0);
     SetFocus(handle);
     return handle != 0;
 }
 
-void СEditControlWindow::Show(int cmdShow) {
+void CEditControlWindow::Show(int cmdShow) {
     ShowWindow(handle, cmdShow);
 }
 
-HWND СEditControlWindow::GetHandle() {
+HWND CEditControlWindow::GetHandle() {
     return handle;
 }
