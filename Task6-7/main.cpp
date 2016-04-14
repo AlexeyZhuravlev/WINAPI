@@ -24,7 +24,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE prevInstance, LPWSTR commandLi
             return -1;
         }
         if( !TranslateAccelerator(window.GetHandle(), accelHandle, &message) && 
-            !::IsDialogMessage( window.GetOptionsDialogHandle(), &message ) ) {
+            !IsDialogMessage( window.GetOptionsDialogHandle(), &message ) ) {
             ::TranslateMessage(&message);
             ::DispatchMessage(&message);
         }

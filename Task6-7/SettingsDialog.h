@@ -10,6 +10,7 @@
 struct CSettings {
     LOGFONT font;
     BYTE opacity;
+    DWORD fontColor, bgColor;
 };
 
 class CSettingsDialog {
@@ -30,9 +31,11 @@ private:
     bool preview;
     CSettings oldSettings, newSettings;
     HFONT actualFont;
+    COLORREF chosenPalitre[16];
 
     void updateSettings(const CSettings& settings);
     void tryUpdate();
+    void selectColor(DWORD& targetColor);
 
     static INT_PTR CALLBACK dialogProc(HWND handleDlg, UINT message, WPARAM wParam, LPARAM lParam);
 };

@@ -10,7 +10,11 @@ CNotepadWindow::CNotepadWindow()
 {
     handle = 0;
     menu = 0;
-    changed = false;
+    changed = 0;
+    textColor = 0;
+    bgColor = 0;
+    opacity = 0;
+    activeBrush = 0;
     editControl = CEditControlWindow();
     settingsDialog = CSettingsDialog();
 }
@@ -40,6 +44,8 @@ bool CNotepadWindow::Create()
     CreateWindowEx(WS_EX_LAYERED, L"NotepadWindow", windowTitle, WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, GetModuleHandle(0), this);
     SetLayeredWindowAttributes(handle, 0, 255, LWA_ALPHA);
+    opacity = 255;
+    changed = false;
     delete[] windowTitle;
     return (handle != 0);
 }
@@ -53,7 +59,28 @@ HWND CNotepadWindow::GetOptionsDialogHandle() {
 }
 
 HWND CNotepadWindow::GetEditControlHandle() {
-    return settingsDialog.GetHandle();
+    return editControl.GetHandle();
+}
+
+COLORREF CNotepadWindow::GetBgColor() {
+    return bgColor;
+}
+
+COLORREF CNotepadWindow::GetTextColor() {
+    return textColor;
+}
+
+BYTE CNotepadWindow::GetOpacity() {
+    return opacity;
+}
+
+void CNotepadWindow::SetColors(COLORREF bgColor_, COLORREF textColor_) {
+    bgColor = bgColor_;
+    textColor = textColor_;
+}
+
+void CNotepadWindow::SetOpacity(BYTE opacity_) {
+    opacity = opacity_;
 }
 
 void CNotepadWindow::Show(int cmdShow)
@@ -68,6 +95,8 @@ void CNotepadWindow::OnNCCreate(HWND _handle)
 
 void CNotepadWindow::OnCreate()
 {
+    textColor = RGB(0, 0, 0);
+    bgColor = RGB(255, 255, 255);
     editControl.Create(handle);
     menu = LoadMenu(GetModuleHandle(0), MAKEINTRESOURCE(IDR_MENU1));
     HFONT hFont = CreateFont(14, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
@@ -186,6 +215,16 @@ void CNotepadWindow::OnCommand(WPARAM wParam, LPARAM lParam)
     }
 }
 
+LRESULT CNotepadWindow::OnControlColorEdit(HDC hdc) {
+    SetTextColor(hdc, textColor);
+    SetBkColor(hdc, bgColor);
+    if (activeBrush != 0) {
+        DeleteObject(activeBrush);
+    }
+    activeBrush = CreateSolidBrush(bgColor);
+    return (LRESULT)activeBrush;
+}
+
 void CNotepadWindow::OnDestroy()
 {
     DestroyIcon(smallIcon);
@@ -193,6 +232,9 @@ void CNotepadWindow::OnDestroy()
     DestroyMenu(menu);
     HFONT font = reinterpret_cast<HFONT>(SendMessage(editControl.GetHandle(), WM_GETFONT, 0, 0));
     DeleteObject(font);
+    if (activeBrush != 0) {
+        DeleteObject(activeBrush);
+    }
     PostQuitMessage(0);
 }
 
@@ -240,6 +282,10 @@ LRESULT CNotepadWindow::windowProc(HWND handle, UINT message, WPARAM wParam, LPA
         {
             window->OnDestroy();
             return 0;
+        }
+        case WM_CTLCOLOREDIT:
+        {
+            return window->OnControlColorEdit(reinterpret_cast<HDC>(wParam));
         }
         default:
         {

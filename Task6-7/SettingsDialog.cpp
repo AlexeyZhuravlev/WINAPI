@@ -13,6 +13,7 @@ CSettingsDialog::CSettingsDialog()
     editControlHandle = 0;
     ::ZeroMemory(&oldSettings, sizeof(CSettings));
     ::ZeroMemory(&newSettings, sizeof(CSettings));
+    ::ZeroMemory(chosenPalitre, 16 * sizeof(COLORREF));
 }
 
 CSettingsDialog::~CSettingsDialog() 
@@ -24,9 +25,10 @@ bool CSettingsDialog::Create(HWND parentHandle_)
     parentHandle = parentHandle_;
     CNotepadWindow* parent = (CNotepadWindow*)GetWindowLongPtr(parentHandle, GWLP_USERDATA);
     editControlHandle = parent->GetEditControlHandle();
-    INT_PTR success = ::DialogBoxParam(GetModuleHandle(0), MAKEINTRESOURCE(IDD_DIALOG1), parentHandle, dialogProc,
+    CreateDialogParam(GetModuleHandle(0), MAKEINTRESOURCE(IDD_DIALOG1), parentHandle, dialogProc,
         reinterpret_cast<LPARAM>(this));
-    return( success != -1 );
+    ShowWindow(handle, SW_SHOW);
+    return( handle != 0 );
 }
 
 HWND CSettingsDialog::GetHandle() {
@@ -44,10 +46,12 @@ void CSettingsDialog::OnInit(HWND handle_)
     actualFont = reinterpret_cast<HFONT>(SendMessage(editControlHandle, WM_GETFONT, 0, 0));
     GetObject(actualFont, sizeof(logFont), &logFont);
     newSettings.font = logFont;
-    newSettings.opacity = 255;
+    newSettings.opacity = parent->GetOpacity();
+    newSettings.fontColor = parent->GetTextColor();
+    newSettings.bgColor = parent->GetBgColor();
     oldSettings = newSettings;
     SendMessage(GetDlgItem(handle, IDC_SLIDER_FONTSIZE), TBM_SETPOS, true, (LPARAM)logFont.lfHeight);
-    SendMessage(GetDlgItem(handle, IDC_SLIDER_BACKGROUND_OPACITY), TBM_SETPOS, true, 255);
+    SendMessage(GetDlgItem(handle, IDC_SLIDER_BACKGROUND_OPACITY), TBM_SETPOS, true, newSettings.opacity);
 }
 
 void CSettingsDialog::OnDestroy() 
@@ -55,10 +59,23 @@ void CSettingsDialog::OnDestroy()
 }
 
 void CSettingsDialog::updateSettings(const CSettings& settings) {
+    CNotepadWindow* parent = (CNotepadWindow*)GetWindowLongPtr(parentHandle, GWLP_USERDATA);
     DeleteObject(actualFont);
     actualFont = CreateFontIndirect(&settings.font);
     SendMessage(editControlHandle, WM_SETFONT, reinterpret_cast<WPARAM>(actualFont), TRUE);
     SetLayeredWindowAttributes(parentHandle, 0, settings.opacity, LWA_ALPHA);
+    parent->SetColors(settings.bgColor, settings.fontColor);
+    parent->SetOpacity(settings.opacity);
+}
+
+void CSettingsDialog::selectColor(DWORD& targetColor) {
+    CHOOSECOLOR choosecolor = {};
+    choosecolor.lStructSize = sizeof(CHOOSECOLOR);
+    choosecolor.Flags = CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT;
+    choosecolor.lpCustColors = chosenPalitre;
+    choosecolor.rgbResult = targetColor;
+    ::ChooseColor(&choosecolor);
+    targetColor = choosecolor.rgbResult;
 }
 
 INT_PTR CSettingsDialog::OnCommand(WPARAM wParam) 
@@ -66,12 +83,12 @@ INT_PTR CSettingsDialog::OnCommand(WPARAM wParam)
     switch LOWORD(wParam) {
         case IDC_BUTTON_FONT:
         {
-            CHOOSECOLORW choosecolor = {};
-            choosecolor.lStructSize = sizeof(CHOOSECOLORW);
-            choosecolor.hwndOwner = parentHandle;
-            choosecolor.rgbResult = RGB(0, 0, 0);
-            choosecolor.Flags = CC_RGBINIT;
-            ::ChooseColor(&choosecolor);
+            selectColor(newSettings.fontColor);
+            break;
+        }
+        case IDC_BUTTON_BACKGROUND:
+        {
+            selectColor(newSettings.bgColor);
             break;
         }
         case IDC_CHECK1:
