@@ -1,9 +1,11 @@
 // Автор: Алексей Журавлев
-// Описание:
+// Описание: Класс, реализующий функционал менеджера работы с памятью.
 
 #include <Windows.h>
 #include <set>
 #include <vector>
+#include <iostream>
+#include <algorithm>
 
 #pragma once
 
@@ -37,7 +39,8 @@ private:
 	int roundTo(int number, int divider);
 	void addEmptyBlockWithMerge(LPVOID block, int BlockSize);
 	template <typename setType>	std::pair<LPVOID, int> tryLeftMerge(std::set<setType>& targetSet, setType compareElement);
-	template <typename setType>	std::pair<LPVOID, int> tryRightMerge(std::set<setType>& targetSet, setType compareElement);
+	template <typename setType>	std::pair<LPVOID, int> tryRightMerge(std::set<setType>& targetSet, setType compareElement, 
+		int BlockSize);
 	std::pair<LPVOID, int> getBestMergeResult(std::pair<LPVOID, int> first, std::pair<LPVOID, int> second,
 		std::pair<LPVOID, int> third);
 

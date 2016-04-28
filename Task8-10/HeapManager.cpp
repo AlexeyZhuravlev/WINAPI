@@ -1,10 +1,8 @@
 // Автор: Алексей Журавлев
-// Описание:
+// Описание: Реализация методов класса CHeapManager
 
 #define NOMINMAX
 #include "HeapManager.h"
-#include <iostream>
-#include <algorithm>
 
 const int CHeapManager::pageSize = CHeapManager::getPageSize();
 const int CHeapManager::mediumMemoryBlockMaxSize = CHeapManager::pageSize * 32;
@@ -31,7 +29,7 @@ void CHeapManager::Create(int minSize, int maxSize_)
 		return;
 	}
 	int numberOfPages = minSize / pageSize;
-	commitPages(heapHead, numberOfPages);
+	commitPages(heapHead, minSize);
 	// Начально выделенное количество страниц будет всегда в физической памяти до вызова Destroy
 	pages.resize(numberOfPages, 1);
 	addFreeBlock(heapHead, maxSize);
@@ -76,12 +74,12 @@ void CHeapManager::Free(void *mem)
 			lastZeroPage = page;
 		}
 	}
+	addEmptyBlockWithMerge(mem, blockSize + sizeof(int));
+	allocatedBlocks.erase(mem);
 	if( firstZeroPage >= startPage ) {
-		VirtualFree(static_cast<byte*>(heapHead) + firstZeroPage * pageSize, (lastZeroPage - firstZeroPage + 1) 
+		VirtualFree(static_cast<byte*>(heapHead) + firstZeroPage * pageSize, (lastZeroPage - firstZeroPage + 1)
 			* pageSize, MEM_DECOMMIT);
 	}
-	addEmptyBlockWithMerge(mem, blockSize);
-	allocatedBlocks.erase(mem);
 }
 
 void CHeapManager::Destroy() 
@@ -90,6 +88,10 @@ void CHeapManager::Destroy()
 		std::cerr << "Unfreed region: start " << *it << " size: " << getBlockSize(*it) << std::endl;
 	}
 	VirtualFree(heapHead, maxSize, MEM_RELEASE);
+	heapHead = 0;
+	pages = std::vector<int>();
+	freeSmallMemoryBlocks = std::set<LPVOID>();
+	freeLargeMemoryBlocks = freeMediumMemoryBlocks = std::set<std::pair<LPVOID, int>>();
 }
 
 
@@ -113,6 +115,11 @@ int CHeapManager::getPageSize()
 void CHeapManager::addFreeBlock(LPVOID start, int size) 
 {
 	if( size < pageSize ) {
+		int startPage, endPage;
+		std::make_pair(std::ref(startPage), std::ref(endPage)) = getStartAndEndPages(start, size);
+		if (pages[startPage] == 0) {
+			exit(1000);
+		}
 		memcpy(start, &size, sizeof(int));
 		freeSmallMemoryBlocks.insert(start);
 	} else if( size < mediumMemoryBlockMaxSize ) {
@@ -208,8 +215,8 @@ void CHeapManager::addEmptyBlockWithMerge(LPVOID block, int blockSize)
 	} else {
 		leftBorder = block;
 	}
-	best = getBestMergeResult(tryRightMerge(freeSmallMemoryBlocks, block), tryRightMerge(freeMediumMemoryBlocks,
-		compareElement), tryRightMerge(freeLargeMemoryBlocks, compareElement));
+	best = getBestMergeResult(tryRightMerge(freeSmallMemoryBlocks, block, blockSize), tryRightMerge(freeMediumMemoryBlocks,
+		compareElement, blockSize), tryRightMerge(freeLargeMemoryBlocks, compareElement, blockSize));
 	if (best.first != 0) {
 		size += best.second;
 	}
@@ -226,38 +233,44 @@ std::pair<LPVOID, int> CHeapManager::tryLeftMerge(std::set<setType>& targetSet, 
 	int leftSize = getBlockSize(*found);
 	LPVOID leftBlock = getBlock(*found);
 	LPVOID currentBlock = getBlock(compareElement);
-	if( static_cast<byte*>(currentBlock) - static_cast<byte*>(leftBlock) == leftSize + sizeof(int) ) {
+	if( static_cast<byte*>(currentBlock) - static_cast<byte*>(leftBlock) == leftSize ) {
 		targetSet.erase(found);
-		return std::make_pair(leftBlock, leftSize + sizeof(int));
+		return std::make_pair(leftBlock, leftSize);
 	} else {
 		return std::make_pair(static_cast<LPVOID>(0), 0);
 	}
 }
 
 template <typename setType>
-std::pair<LPVOID, int> CHeapManager::tryRightMerge(std::set<setType>& targetSet, setType compareElement)
+std::pair<LPVOID, int> CHeapManager::tryRightMerge(std::set<setType>& targetSet, setType compareElement, int currentSize)
 {
 	std::set<setType>::iterator found = targetSet.upper_bound(compareElement);
 	if (found == targetSet.end()) {
 		return std::make_pair(static_cast<LPVOID>(0), 0);
 	}
 	LPVOID currentBlock = getBlock(compareElement);
-	int currentSize = getBlockSize(compareElement);
 	LPVOID rightBlock = getBlock(*found);
 	int rightSize = getBlockSize(*found);
-	if( static_cast<byte*>(rightBlock) - static_cast<byte*>(currentBlock) == currentSize + sizeof(int) ) {
+	if( static_cast<byte*>(rightBlock) - static_cast<byte*>(currentBlock) == currentSize) {
 		targetSet.erase(found);
-		return std::make_pair(rightBlock, rightSize + sizeof(int));
+		return std::make_pair(rightBlock, rightSize);
 	} else {
 		return std::make_pair(static_cast<LPVOID>(0), 0);
 	}
 }
 
 std::pair<LPVOID, int> CHeapManager::getBestMergeResult(std::pair<LPVOID, int> first, std::pair<LPVOID, int> second,
-	std::pair<LPVOID, int> third) {
+	std::pair<LPVOID, int> third) 
+{
 	if (first.first != 0) {
+		if (second.first != 0 || third.first != 0) {
+			exit(1000);
+		}
 		return first;
 	} else if (second.first != 0) {
+		if (third.first != 0) {
+			exit(1000);
+		}
 		return second;
 	} else {
 		return third;
